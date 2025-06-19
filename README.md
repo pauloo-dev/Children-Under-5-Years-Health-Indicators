@@ -97,7 +97,7 @@ A time series chart revealing trends in acute malnutrition across the reporting 
 
 > Visualizing the relationship between deworming efforts and acute malnutrition:
 
-![Deworming vs Acute Malnutrition](assets/TotalDewormed_vs.Acute_Malnutrition.png)
+![Deworming vs Acute Malnutrition](assets/TotalDewormed_vs_AcuteMalnutrition.png)
 
 ---
 
