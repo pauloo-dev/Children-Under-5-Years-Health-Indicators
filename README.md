@@ -3,8 +3,7 @@
 > 📊 *A Data Analysis Project by Paul Muriithi*  
 > 🗓️ *Date: July 20, 2023*
 
-📬 [Email Me](mutukupaul76@gmail.com)
-🌐 [GitHub](https://github.com/yourprofile) | [LinkedIn](https://linkedin.com/in/paul-mutuku-85a2b1260)
+📬 [Email Me](mutukupaul76@gmail.com) | 🌐 [GitHub](https://github.com/pauloo-dev) | [LinkedIn](https://linkedin.com/in/paul-mutuku-85a2b1260)
 
 ---
 
