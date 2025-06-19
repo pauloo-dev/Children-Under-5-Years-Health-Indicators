@@ -147,10 +147,10 @@ data$Month <- month(data$Period, label = TRUE, abbr = TRUE)
 data %>%
   mutate(name = fct_reorder(Month, AcuteMalnutrition)) %>%
   ggplot( aes(Month, AcuteMalnutrition)) +
-  geom_bar(stat="identity", fill="#f68060", alpha=.6, width=.4) +
+  geom_bar(stat="identity", fill="orange", alpha=.6, width=.4) +
   coord_flip() +
   xlab("") +
-  theme_bw()
+  theme_bw() +labs(title = "Montlhy Acute Mulnutrition")
 
 ```
 
