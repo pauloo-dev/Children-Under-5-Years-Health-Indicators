@@ -1,7 +1,10 @@
-# Exploring Health Indicators for Children Under 5 in Kenya
+# Exploring Health Indicators for Children Under 5 Years in Kenya
 
 > 📊 *A Data Analysis Project by Paul Muriithi*  
 > 🗓️ *Date: July 20, 2023*
+
+📬 [Email Me](mutukupaul76@gmail.com)
+🌐 [GitHub](https://github.com/yourprofile) | [LinkedIn](https://linkedin.com/in/paul-mutuku-85a2b1260)
 
 ---
 
@@ -190,8 +193,8 @@ A time series chart revealing trends in acute malnutrition across the reporting 
 
 **Paul Muriithi**  
 🎓 Data Analyst | 📍 Nairobi, Kenya  
-📬 [Email Me](mailto:paulmuriithi@example.com)  
-🌐 [GitHub](https://github.com/yourprofile) | [LinkedIn](https://linkedin.com/in/yourprofile)
+📬 [Email Me](mutukupaul76@gmail.com)  
+🌐 [GitHub](https://github.com/yourprofile) | [LinkedIn](https://linkedin.com/in/paul-mutuku-85a2b1260)
 
 ---
 
