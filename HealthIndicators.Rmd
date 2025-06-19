@@ -49,7 +49,7 @@ Next, we load the dataset from the provided URL and display the first few rows t
 
 ```{r}
 # Load the data from the provided URL
-data_url <- "https://raw.githubusercontent.com/cema-uonbi/internship_task/main/data/cema_internship_task_2023.csv"
+data_url <- "health_data.csv"
 data <- read.csv(data_url)
 
 # View the first few rows of the dataset
