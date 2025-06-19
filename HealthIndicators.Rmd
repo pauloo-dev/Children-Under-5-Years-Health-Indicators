@@ -1,0 +1,441 @@
+---
+title: "**Exploring Health Indicators for Children Under 5 Years at a County Level**"
+author: Paul Muriithi
+output: pdf_document
+date: "2023-07-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = '')
+```
+
+
+# **Abstract**
+
+This data analysis explores health indicators for children under 5 years at a county level in Kenya, focusing on the period from January 2021 to June 2023. The dataset contains monthly data on various variables, including the total number of children dewormed, cases of acute malnutrition, stunted children, children with diarrhea cases, and underweight children in different age groups. The primary goal of this analysis is to identify trends, patterns, and potential relationships between these health indicators to gain insights into child health at a regional level.
+
+# **Introduction**
+
+Child health is a critical aspect of public health, and monitoring key health indicators can provide valuable insights into the well-being of young children. This analysis aims to explore the health indicators for children under 5 years in Kenya's counties to better understand the health status and identify potential areas for improvement.
+
+The dataset used in this analysis consists of granular information at a county level, allowing us to investigate variations in health indicators across regions. We will begin by performing exploratory data analysis (EDA) to understand the data distribution, handle missing values, and visualize key health indicators over time. Subsequently, we will conduct regression analysis to assess the relationship between deworming efforts, stunted growth, underweight cases, and acute malnutrition.
+
+Through this analysis, we hope to provide valuable insights into the health status of children under 5 years in different Kenyan counties, which can be utilized to inform targeted interventions and policies to improve child health outcomes.
+
+
+# **1. Exploratory Data Analysis (EDA)**
+
+In this section, we perform exploratory data analysis on the provided dataset containing monthly data for children under 5 years, disaggregated at a county level for the period January 2021 to June 2023. The dataset includes information on various variables, such as the total number of children dewormed, number of children with acute malnutrition, stunted children, children with diarrhea cases, and underweight children in different age groups.
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(lubridate)
+library(psych)
+library(knitr)
+library(gridExtra)
+library(lares) 
+library(ggridges)
+library(forcats)
+library(hrbrthemes)
+library(viridis)
+library(hrbrthemes)
+```
+
+
+## **1.1 Load the Data**
+
+Next, we load the dataset from the provided URL and display the first few rows to get an overview of the data structure.
+
+```{r}
+# Load the data from the provided URL
+data_url <- "https://raw.githubusercontent.com/cema-uonbi/internship_task/main/data/cema_internship_task_2023.csv"
+data <- read.csv(data_url)
+
+# View the first few rows of the dataset
+head(data[c(1:4)])
+```
+
+
+
+
+## **1.2 Data Preprocessing**
+In this step, we rename the column names to make them more descriptive and check for any missing values in the dataset. If there are missing values, we replace them with the median of the corresponding column.
+
+```{r}
+# Rename column names
+colnames(data) <- c("Period", "County", "Dewormed", "AcuteMalnutrition", "Stunted(6-23m)",
+                    "Stunted(0-<6m)", "Stunted(24-59m)", "DiarrheaCases", "Underweight(0-<6m)",
+                    "Underweight(6-23m)", "Underweight(24-59m)")
+
+
+# Check for missing values
+print(sum(is.na(data)))
+
+# replace missing with average
+data <- data %>% 
+  mutate(across(c(3:11), ~replace_na(., median(., na.rm=TRUE))))
+
+# Check for missing values
+sum(is.na(data))
+```
+
+## **1.3 Data Transformation**
+We convert the 'Period' column to datetime format and arrange the data by 'Period' in ascending order. Additionally, we extract the year from the 'Period' column to facilitate time-series analysis.
+
+```{r}
+# Convert 'Period' column to datetime format
+data$Period <- dmy(paste0("01-", data$Period)) # Adding "01-" for day to create valid date format
+
+# Arrange data by 'Period' in ascending order
+data <- data %>% arrange(Period)
+
+# Extract year from 'Period' column
+data$Year <- year(data$Period)
+
+
+
+str(data)
+```
+
+
+
+
+
+## **1.4 Data Description**
+We generate descriptive statistics for numerical variables, including mean, standard deviation, median, minimum, maximum, range, and standard error.
+
+```{r}
+# Describe the data
+kable(describe(data[c(3:11)]) %>%
+  select(n, mean, sd, median, min, max, range, se), signif = 3, caption = "Summary Statistics")
+```
+
+
+## **1.5 Ranking of Total Dewormed by Counties**
+We create a bar plot to rank the counties based on the total number of children dewormed. The height of each bar represents the total dewormed count for the respective county.
+
+```{r, fig.height=10}
+data1 <- data%>%
+  group_by(County) %>%
+  summarise(Dewormed = sum(Dewormed)) %>%
+  filter(Dewormed> 25000)
+
+  ggplot(data=data1,aes(x=reorder(County,Dewormed, top = 10),y=Dewormed)) + 
+  geom_bar(stat ='identity',aes(fill=Dewormed))+
+  coord_flip() + 
+  theme_grey() + 
+  scale_fill_gradient(name="Total Dewormed")+
+  labs(title = 'Ranking of Counties by Dewormed Children',
+       y='Total Dewormed',x='Counties')
+```
+
+
+
+## **1.6 Monthly Distribution of Acute Malnutrition Cases**
+In this section, we focus on visualizing the monthly distribution of acute malnutrition cases. We start by extracting the month from the 'Period' column and create a new column 'Month' with abbreviated month names.
+
+To display the distribution effectively, we reorder the months based on the number of acute malnutrition cases. This arrangement ensures that the months are displayed in descending order of acute malnutrition cases.
+
+```{r}
+
+# Extract the month from 'Period'
+data$Month <- month(data$Period, label = TRUE, abbr = TRUE)
+
+
+# Reorder following the value of another column:
+data %>%
+  mutate(name = fct_reorder(Month, AcuteMalnutrition)) %>%
+  ggplot( aes(Month, AcuteMalnutrition)) +
+  geom_bar(stat="identity", fill="#f68060", alpha=.6, width=.4) +
+  coord_flip() +
+  xlab("") +
+  theme_bw()
+
+```
+
+
+## ** 1.7 Time Series of Acute Malnutrition**
+We visualize the time series of acute malnutrition cases over the study period. The plot shows the trend of acute malnutrition cases for each month.
+
+```{r}
+
+# Group data by Period and calculate monthly sum of Acute Malnutrition cases
+data_time_series <- data %>%
+  group_by(Period) %>%
+  summarise(Total_Acute_Malnutrition = sum(AcuteMalnutrition, na.rm = TRUE)) %>%
+  ungroup()
+
+# Time series plot
+ggplot(data_time_series, aes(x = Period, y = Total_Acute_Malnutrition)) +
+  geom_line() +
+  labs(title = "Time Series of Acute Malnutrition",
+       x = "Period",
+       y = "Total Acute Malnutrition") +
+  theme_minimal()
+```
+
+
+
+
+
+
+
+
+# **2. Data Analysis**
+
+# 2.1 **Research Question:**
+Before conducting the data analysis, let's define the research question based on the dataset:
+
+- ***Research Question:** How does the total number of children with Acute Malnutrition vary across counties, and what is the relationship between deworming efforts, stunted growth, underweight and acute malnutrition cases in different counties?
+
+
+## **2.2 Top 10 Counties with Highest Total Dewormed**
+We identify the top 10 counties with the highest total dewormed count and display their corresponding acute malnutrition values in a table.
+
+```{r}
+
+top_10_counties <- data %>%
+  group_by(County) %>%
+  summarise(Total_Dewormed = median(Dewormed),
+            Acute_Malnutrition = median(AcuteMalnutrition)) %>%
+  top_n(10, Total_Dewormed) %>%
+  arrange(desc(Total_Dewormed))
+
+# Display the top 10 counties and their corresponding Acute Malnutrition values
+kable(top_10_counties, caption = "Top 10 counties with highest Deworming rate")
+```
+
+
+
+
+## **2.3 Analysing Total Dewormed vs. Acute Malnutrition**
+We create separate time series plots for the total number of children dewormed and acute malnutrition cases over the study period. These plots allow us to observe any trends or patterns in the two variables.
+
+```{r}
+# Time series plot for Total Dewormed and Acute Malnutrition (separate lines)
+data_time_series <- data %>%
+  group_by(Period) %>%
+  summarise(Total_Dewormed = sum(Dewormed, na.rm = TRUE),
+            Acute_Malnutrition = sum(AcuteMalnutrition, na.rm = TRUE))
+
+# Plot for Total Dewormed
+plot_total_dewormed <- ggplot(data_time_series, aes(x = Period, y = Total_Dewormed)) +
+  geom_line(color = "blue", size = 1.2) +
+  labs(title = "Time Series of Total Dewormed",
+       x = "Year",
+       y = "Total Dewormed") +
+  theme_minimal()
+
+# Plot for Acute Malnutrition
+plot_acute_malnutrition <- ggplot(data_time_series, aes(x = Period, y = Acute_Malnutrition)) +
+  geom_line(color = "red", size = 1.2) +
+  labs(title = "Time Series of Acute Malnutrition",
+       x = "Year",
+       y = "Acute Malnutrition") +
+  theme_minimal()
+
+
+# Scatter plot
+scatter_plot <- ggplot(data_time_series, aes(x = Total_Dewormed, y = Acute_Malnutrition)) +
+  geom_point(color = "blue", size = 3) +
+  geom_smooth(method = "lm", color = "red", se = FALSE, size = 1.2) +
+  labs(title = "Acute Malnutrition vs. Dewormed",
+       x = "Total Dewormed",
+       y = "Acute Malnutrition") +
+  theme_minimal()
+# Calculate IQR and filter out outliers for 'Total Dewormed' and 'Acute Malnutrition'
+outlier_removed_data <- data %>%
+  filter(between(Dewormed, quantile(Dewormed, 0.25) - 1.5*IQR(Dewormed), quantile(Dewormed, 0.75)+
+                   1.5*IQR(Dewormed)),
+         between(AcuteMalnutrition, quantile(AcuteMalnutrition, 0.25) - 1.5*IQR(AcuteMalnutrition),
+                 quantile(AcuteMalnutrition, 0.75) + 1.5*IQR(AcuteMalnutrition)))
+
+# Scatter plot without outliers
+without_outliers <- ggplot(outlier_removed_data, aes(x = Dewormed, y = AcuteMalnutrition)) +
+  geom_point(color = "blue", size = 1) +
+  geom_smooth(method = "loess", color = "red", se = FALSE, size = 1.2) +
+  labs(title = "Acute Malnutrition vs. Dewormed",
+       subtitle = "(Without Outliers)",
+       x = "Total Dewormed",
+       y = "Acute Malnutrition") +
+  theme_minimal()
+
+# Combine both plots using grid.arrange
+grid.arrange(plot_total_dewormed, plot_acute_malnutrition, scatter_plot, without_outliers, ncol = 2)
+```
+
+
+
+## **2.4 Comparing Stunted and Underweight Cases by County**
+In this section, we compare the total number of stunted and underweight children in each county. We group the data by county and calculate the aggregate sum of stunting cases (combining cases for age groups 0-6 months, 6-23 months, and 24-59 months) and underweight cases (combining cases for age groups 0-6 months, 6-23 months, and 24-59 months) for each county.
+
+The table below shows the top 10 counties with the highest number of stunted and underweight children.
+
+```{r}
+# Calculate the stunting cases for each county
+stunted_cases <- data %>%
+  group_by(County) %>%
+  summarise(Stunted = sum(`Stunted(0-<6m)`, `Stunted(6-23m)`, `Stunted(24-59m)`),
+            Underweight  = sum(`Underweight(0-<6m)`, `Underweight(6-23m)`, `Underweight(24-59m)`)) %>%
+  arrange(desc(Underweight)) %>%
+  top_n(10, Underweight)
+
+kable(stunted_cases, caption = "Number of Stunted and Underweight Children by county")
+```
+
+## 2.5 Comparing Stunted and Underweight Cases Over Time
+We compare the time series of stunted and underweight cases for different age groups (0-6 months, 6-23 months, and 24-59 months) over the study period. The plots display the trend of stunted and underweight cases for each age group.
+
+```{r fig.width=12, fig.height=4}
+# Time series plots
+stunted_underweight_ts <- data %>%
+  group_by(Period) %>%
+  summarise(`Stunted(0-<6m)` = sum(`Stunted(0-<6m)`),
+            `Stunted(6-23m)` = sum(`Stunted(6-23m)`),
+            `Stunted(24-59m)` = sum(`Stunted(24-59m)`),
+            `Underweight(0-<6m)` = sum(`Underweight(0-<6m)`),
+            `Underweight(6-23m)` = sum(`Underweight(6-23m)`),
+            `Underweight(24-59m)` = sum(`Underweight(24-59m)`))
+
+stunted_plot <- ggplot(stunted_underweight_ts, aes(x = Period)) +
+  geom_line(aes(y = `Stunted(0-<6m)`, color = "Stunted(0-<6m)"), size = 1.2) +
+  geom_line(aes(y = `Stunted(6-23m)`, color = "Stunted(6-23m)"), size = 1.2) +
+  geom_line(aes(y = `Stunted(24-59m)`, color = "Stunted(24-59m)"), size = 1.2) +
+  labs(title = "Comparing Stunted Cases Over Time",
+       x = "Period",
+       y = "Stunted Cases",
+       color = "Variable") +
+  scale_color_manual(name = "Variable", 
+                     values = c("Stunted(0-<6m)" = "blue", 
+                                "Stunted(6-23m)" = "red", 
+                                "Stunted(24-59m)" = "green")) +
+  theme_minimal()
+
+
+# 
+underweight_plot <- ggplot(stunted_underweight_ts, aes(x = Period)) +
+  geom_line(aes(y = `Underweight(0-<6m)`, color = "Underweight(0-<6m)"), size = 1.2) +
+  geom_line(aes(y = `Underweight(6-23m)`, color = "Underweight(6-23m)"), size = 1.2) +
+  geom_line(aes(y = `Underweight(24-59m)`, color = "Underweight(24-59m)"), size = 1.2) +
+  labs(title = "Comparing Underweight Cases Over Time",
+       x = "Period",
+       y = "Underweight Cases",
+       color = "Variable") +
+  scale_color_manual(name = "Variable", 
+                     values = c("Underweight(0-<6m)" = "blue", 
+                                "Underweight(6-23m)" = "red", 
+                                "Underweight(24-59m)" = "green")) +
+  theme_minimal()
+
+# Combine both plots using grid.arrange
+grid.arrange(stunted_plot, underweight_plot, ncol = 2)
+```
+
+
+
+
+
+## **2.6 Correlation Analysis**
+Finally, we perform a correlation analysis to identify the top 10 correlations with acute malnutrition. We display the correlation matrix and cross-correlations for these top correlations.
+
+```{r fig.width=10, fig.height=5}
+# Add 'TotalStunted' and 'TotalUnderweight' columns
+#data$TotalStunted <- data$`Stunted(0-<6m)` + data$`Stunted(6-23m)` + data$`Stunted(24-59m)`
+#data$TotalUnderweight <- data$`Underweight(0-<6m)` + data$`Underweight(6-23m)` + data$`Underweight(24-59m)`
+
+
+# Show only top 5 corrrelations
+acute_mal_corr <- data%>%corr_var(AcuteMalnutrition, top = 10)
+
+grid.arrange(acute_mal_corr, corr_cross(data, top = 10), ncol=2)
+```
+
+
+
+
+## **2.7 Regression Analysis**
+
+```{r}
+
+# Perform linear regression
+regression_model <- lm(log(AcuteMalnutrition) ~ Dewormed + DiarrheaCases + 
+                         `Stunted(6-23m)` + `Stunted(0-<6m)` + `Stunted(6-23m)` +
+                         `Stunted(24-59m)` + `Underweight(0-<6m)` + `Underweight(6-23m)` +
+                         `Underweight(24-59m)`, data = data)
+
+# Extract only the coefficients table from the summary of the regression model
+coefficients <- summary(regression_model)$coefficients
+
+# Print the coefficients table
+kable(coefficients, caption = "Regression coefficients")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
