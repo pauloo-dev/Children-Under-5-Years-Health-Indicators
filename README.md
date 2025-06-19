@@ -5,6 +5,30 @@
 
 ---
 
+---
+## 📚 Table of Contents
+
+- [Project Overview](#-project-overview)
+- [1. Exploratory Data Analysis EDA](#-1-exploratory-data-analysis-eda)
+  - [Data Cleaning](#-data-cleaning)
+  - [Summary Statistics](#-summary-statistics)
+  - [Deworming by County (Top Counties)](#-deworming-by-county-top-counties)
+  - [Monthly Acute Malnutrition Distribution](#-monthly-acute-malnutrition-distribution)
+  - [Acute Malnutrition Over Time](#-acute-malnutrition-over-time)
+- [2. Deep Dive: Relationships & Comparisons](#-2-deep-dive-relationships--comparisons)
+  - [Research Question](#-research-question)
+  - [Deworming vs. Malnutrition](#-deworming-vs-malnutrition)
+  - [Stunted vs Underweight by County](#-stunted-vs-underweight-by-county)
+  - [Time Series: Stunted & Underweight Trends](#-time-series-stunted--underweight-trends)
+  - [Correlation Analysis](#-correlation-analysis)
+- [3. Regression Analysis](#-3-regression-analysis)
+- [Tools & Technologies](#-tools--technologies)
+- [👨Author](#-author)
+
+
+---
+
+
 ## 🌍 Project Overview
 
 This project explores the health landscape of children under 5 years across Kenyan counties using monthly data from **January 2021 to June 2023**. The dataset features critical health indicators such as:
@@ -81,7 +105,7 @@ This chart shows which months saw the highest burden of acute malnutrition:
 
 A time series chart revealing trends in acute malnutrition across the reporting period:
 
-![Acute Malnutrition Time Series](assets/Acute_Mulnutrition.png)
+![Acute Malnutrition Time Series](assets/Acute_Malnutrition_TS.png)
 
 ---
 
