@@ -193,7 +193,7 @@ A time series chart revealing trends in acute malnutrition across the reporting 
 **Paul Muriithi**  
 🎓 Data Analyst | 📍 Nairobi, Kenya  
 📬 [Email Me](mutukupaul76@gmail.com)  
-🌐 [GitHub](https://github.com/yourprofile) | [LinkedIn](https://linkedin.com/in/paul-mutuku-85a2b1260)
+🌐 [GitHub](https://github.com/pauloo-dev) | [LinkedIn](https://linkedin.com/in/paul-mutuku-85a2b1260)
 
 ---
 
